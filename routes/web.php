@@ -29,13 +29,15 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
-Route::any('/', [AdminController::class, "login"]);
+Route::get('/', [AdminController::class, "login"]);
 Route::post('signin', [AdminController::class, "actionSignin"])->name('signin');
 
 Route::group(['middleware' => ['my.auth']], function () {
+    Route::post('user/save-token', [AdminController::class, "actionSaveToken"]);
     Route::get('signout', [AdminController::class, "actionSignout"])->name('signout');
 
-    Route::any('/chat', [ChatController::class, "chat"]);
+    Route::get('/chat', [ChatController::class, "chat"]);
+    Route::get('/chat/{id}', [ChatController::class, "chat"]);
 
     Route::any('/dashboard', [DashboardController::class, "dashboard"]);
     Route::any('/dashboard/{slug}', [DashboardController::class, "view"]);

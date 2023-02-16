@@ -13,7 +13,7 @@ License: For each use you must have a valid license purchased only from above li
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="token" content="{{csrf_token()}}">
+    <meta name="token" content="{{csrf_token()}}">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="description" content="Responsive HTML Admin Dashboard Template based on Bootstrap 5">
     <meta name="author" content="NobleUI">
@@ -124,7 +124,9 @@ License: For each use you must have a valid license purchased only from above li
                                                 src="https://via.placeholder.com/80x80" alt="">
                                         </div>
                                         <div class="text-center">
-                                            <p class="tx-16 fw-bolder"><a href="{{ url('/admin/'.Auth::user()->uuid) }}">{{Auth::user()->fullname}}</a></p>
+                                            <p class="tx-16 fw-bolder"><a
+                                                    href="{{ url('/admin/'.Auth::user()->uuid) }}">{{Auth::user()->fullname}}</a>
+                                            </p>
                                             <p class="tx-12 text-muted">{{Auth::user()->email}}</p>
                                         </div>
                                     </div>
@@ -201,16 +203,80 @@ License: For each use you must have a valid license purchased only from above li
     <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"
         integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        $(function () {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                }
+            });
+        })
+    </script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
 
-	<script>
-		$(function () {
-			$.ajaxSetup({
-				headers: {
-					'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
-				}
-			});
-		})
-	</script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7lHtn6L3qVEBngFI_L5RpBgdkf4LsvwQ",
+            authDomain: "maimaid-app.firebaseapp.com",
+            projectId: "maimaid-app",
+            storageBucket: "maimaid-app.appspot.com",
+            messagingSenderId: "839314473238",
+            appId: "1:839314473238:web:e0747f2f5af518b4dc5037"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        // Retrieve Firebase Messaging object.
+        const messaging = getMessaging(app);
+
+        function sendTokenToServer(fcm_token) {
+            $.ajax({
+                type: 'POST',
+                url: base_url + 'user/save-token',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                },
+                data: {
+                    fcm_token: fcm_token,
+                },
+                success: function(result) {
+                    console.log(result);
+                }
+            });
+        }
+
+        async function retreiveToken(){
+            // Add the public key generated from the console here.
+            const currentToken = await getToken(messaging, {vapidKey: "BOSvkqf2fdIUf1x70tLbbFtqtjxJdf7ipZEJehw3IkAG17iW26S1vvDvwQCiBnfMp-O5R4AA68wSWIQA9ARs5p0"})
+
+            // messaging.getToken().then((currentToken) => {
+                console.log(currentToken);
+                if (currentToken) {
+                    sendTokenToServer(currentToken);
+                } else {
+                    alert('You should allow notification!');
+                }
+            // }).catch((err) => {
+            //     console.log(err.message);
+            // });
+        }
+        retreiveToken();
+        // messaging.onTokenRefresh(()=>{
+        //     retreiveToken();
+        // });
+
+        // messaging.onMessage((payload)=>{
+        //     console.log('Message received');
+        //     console.log(payload);
+
+        //     location.reload();
+        // });
+    </script>
     @if (Session::has('message-error'))
     <script>
         $(window).load(function () {
@@ -234,7 +300,7 @@ License: For each use you must have a valid license purchased only from above li
     </script>
     @endif
 
-	@yield('footer')
+    @yield('footer')
 </body>
 
 </html>

@@ -48,6 +48,16 @@ class AdminController extends Controller
         }
     }
 
+    public function actionSaveToken(Request $request)
+    {
+        $item = Auth::user();
+
+        $item->fcm_token = $request->fcm_token;
+        $item->save();
+
+        return response()->json(['message' => 'Success save token']);
+    }
+
     public function actionSignOut(Request $request)
     {
         Auth::logout();

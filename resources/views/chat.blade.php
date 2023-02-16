@@ -75,8 +75,9 @@ $auth = Auth::user();
                                                                     @endif
                                                                     {{$thread->category->title}}
                                                                 </p>
-                                                                <!-- <p class="text-muted tx-13">Saya ingin tahu cara pesan. -->
-                                                                </p>
+                                                                @if($thread->non_read_chat->count() > 0)
+                                                                <p class="text-muted tx-13">{{$thread->non_read_chat->first()->message}}</p>
+                                                                @endif
 
                                                             </div>
                                                             <div class="d-flex flex-column align-items-end">
@@ -84,9 +85,11 @@ $auth = Auth::user();
                                                                     style="font-size:10px;line-height:12px;">
                                                                     {{$thread->updated_at->format('d/M/y')}}
                                                                     <br>{{$thread->updated_at->format('H:i')}} WIB</p>
+                                                                @if($thread->non_read_chat->count() > 0)
                                                                 <div class="badge rounded-pill bg-danger ms-auto">
-                                                                    {{$thread->non_read_chat_count}}
+                                                                    {{$thread->non_read_chat->count()}}
                                                                 </div>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                     </a>
@@ -197,7 +200,7 @@ $auth = Auth::user();
                                     <i data-feather="corner-up-left" id="backToChatList"
                                         class="icon-lg me-2 ms-n2 text-muted d-lg-none"></i>
                                     <figure class="mb-0 me-2">
-                                        <img src="https://via.placeholder.com/43x43" class="img-sm rounded-circle"
+                                        <img src="{{$target_thread->user1->image_profile}}" class="img-sm rounded-circle"
                                             alt="image">
                                     </figure>
                                     <div>
@@ -218,12 +221,20 @@ $auth = Auth::user();
                                             {{$target_thread->category->title}} - {{$target_thread->updated_at->format('d/M/y')}} </p>
                                     </div>
                                 </div>
+                                @if($target_thread)
+                                    @if($target_thread && $target_thread->status != 2)
+                                    <div class="d-flex align-items-center">
+                                        <a onclick="doneChat()" class="btn btn-success">Done</a>
+                                    </div>
+                                    @endif
+                                @else
                                 <div class="d-flex align-items-center">
-                                    <a href="#" class="btn btn-success">Done</a>
+                                    <a onclick="doneChat()" class="btn btn-success">Done</a>
                                 </div>
+                                @endif
                             </div>
                         </div>
-                        <div class="chat-body">
+                        <div class="chat-body" id="chat-container">
                             <ul class="messages" id="chat-messages">
                                 @foreach ($chats as $chat)
                                 <li class="message-item {{$chat->created_by == $target_thread->user_id_1? 'friend' : 'me'}}">
@@ -241,6 +252,7 @@ $auth = Auth::user();
                                 @endforeach
                             </ul>
                         </div>
+                        @if($target_thread->status != 2)
                         <div class="chat-footer d-flex">
                             <div class="d-none d-md-block">
                                 <button type="button" class="btn border btn-icon rounded-circle me-2"
@@ -260,6 +272,7 @@ $auth = Auth::user();
                                 </button>
                             </div>
                         </div>
+                        @endif
                     </div>
                     @endif
                 </div>
@@ -274,9 +287,46 @@ $auth = Auth::user();
 <!-- End custom js for this page -->
 
 <script>
-    $(window).load(function(){
+    $(document).ready(function(){
+        readChat();
         scrollChat();
     });
+
+    function readChat(){
+        $.ajax({
+            type: 'POST',
+            url: base_url + 'api/chat/read',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+            },
+            data: {
+                thread_id: $('input[name=thread_id]').val(),
+                created_by: $('input[name=created_by]').val(),
+            },
+            success: function(result) {
+                console.log(result);
+            }
+        });
+    }
+
+    function doneChat(){
+        $.ajax({
+            type: 'POST',
+            url: base_url + 'api/chat/done',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+            },
+            data: {
+                thread_id: $('input[name=thread_id]').val(),
+                created_by: $('input[name=created_by]').val(),
+            },
+            success: function(result) {
+                console.log(result);
+                location.reload();
+            }
+        });
+    }
+
     function submitChat(){
         var chatForm = $('input[name=chat_form]').val();
         $.ajax({
@@ -323,8 +373,9 @@ $auth = Auth::user();
     });
 
     function scrollChat(){
-        var scrollObj = document.getElementById("chat-messages");
-        scrollObj.scrollTop = scrollObj.scrollHeight;
+        var chatDiv = $('#chat-container');
+        var height = chatDiv[0].scrollHeight;
+        chatDiv.scrollTop(height);
     }
 </script>
 @endsection

@@ -14,7 +14,7 @@ class ChatController extends Controller
     public function chat(Request $request, $target_thread_id = null)
     {
         $user = Auth::user();
-        $threads = Thread::with('category', 'user1', 'user1.role')->withCount('non_read_chat')->whereNull('user_id_2')->orWhere('user_id_2', $user->user_id)->get();
+        $threads = Thread::with('category', 'user1', 'user1.role')->with(['non_read_chat' => function ($q) use ($user) {$q->where('created_by', '<>', $user->user_id);}])->whereNull('user_id_2')->orWhere('user_id_2', $user->user_id)->get();
 
         $target_thread = Thread::with('category', 'user1', 'user1.role')->where('thread_id', $target_thread_id)->first();
         $chats = Chat::with('created_by_user')->where('thread_id', $target_thread_id)->orderBy('created_at', 'asc')->get();
@@ -88,6 +88,48 @@ class ChatController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
+            return response()->json(['status_code' => 201, 'message' => 'Failed to save message ' . $e->getMessage()]);
+        }
+
+    }
+
+    public function actionRead(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $thread = Thread::find($request->thread_id);
+
+            $chats = Chat::where('thread_id', $thread->thread_id)->whereNull('read_at')->where('created_by', '<>', $request->created_by)->get();
+            foreach ($chats as $chat) {
+                $chat->read_at = now();
+                $chat->save();
+            }
+
+            DB::commit();
+
+            return response()->json(['status_code' => 200, 'message' => 'Success to read message']);
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return response()->json(['status_code' => 201, 'message' => 'Failed to save message ' . $e->getMessage()]);
+        }
+
+    }
+
+    public function actionDone(Request $request)
+    {
+        // DB::beginTransaction();
+        try {
+            $thread = Thread::find($request->thread_id);
+            $thread->status = 2;
+            $thread->save();
+
+            // DB::commit();
+
+            return response()->json(['status_code' => 200, 'message' => 'Success to read message']);
+        } catch (\Exception $e) {
+            // DB::rollback();
 
             return response()->json(['status_code' => 201, 'message' => 'Failed to save message ' . $e->getMessage()]);
         }

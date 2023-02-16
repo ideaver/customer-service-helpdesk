@@ -21,3 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('chat/get-category', [ChatController::class, "actionGetCategory"]);
 Route::post('chat/submit', [ChatController::class, "actionSubmit"]);
+Route::post('chat/read', [ChatController::class, "actionRead"]);
+Route::post('chat/done', [ChatController::class, "actionDone"]);

@@ -26,7 +26,7 @@ class Thread extends Model
 
     public function non_read_chat()
     {
-        return $this->hasMany(Chat::class, 'thread_id')->whereNull('read_at');
+        return $this->hasMany(Chat::class, 'thread_id')->whereNull('read_at')->orderBy('created_at', 'desc');
     }
 
     public function user1()

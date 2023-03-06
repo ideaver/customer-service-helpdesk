@@ -19,7 +19,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('chat/get-category', [ChatController::class, "actionGetCategory"]);
+Route::get('chat/get-thread', [ChatController::class, "actionGetThread"]);
+Route::get('chat/get-chat', [ChatController::class, "actionGetChat"]);
+Route::get('chat/get-topic', [ChatController::class, "actionGetTopic"]);
+
 Route::post('chat/submit', [ChatController::class, "actionSubmit"]);
 Route::post('chat/read', [ChatController::class, "actionRead"]);
 Route::post('chat/done', [ChatController::class, "actionDone"]);
+Route::post('chat/rating', [ChatController::class, "actionRating"]);

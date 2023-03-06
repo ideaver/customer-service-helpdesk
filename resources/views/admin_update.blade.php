@@ -17,6 +17,7 @@
 
                 <form class="forms-sample" method="POST" action="{{route('post.admin.update')}}">
                     {{csrf_field()}}
+                    <input name="uuid" type="hidden" required="" value="{{$item->uuid}}">
                     <div class="mb-3">
                         <label class="form-label">Fullname</label>
                         <input name="fullname" type="text" required="" class="form-control" value="{{$item->fullname}}">
@@ -34,10 +35,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input name="password" type="password" required="" class="form-control">
-                    </div>
+
                     <div class="mb-3" required="">
                         <label class="form-label">Status</label>
                         <select name="is_active" class="form-select" id="exampleFormControlSelect1">
@@ -54,6 +52,19 @@
                     <div class="mb-3">
                         <label class="form-label">Update Date</label>
                         <input type="email" class="form-control" disabled value="{{$item->updated_at}}">
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="1" id="checkbox_change_password" onchange="showDivPassword()">
+                            <label class="form-check-label" for="checkbox_change_password">
+                                Want to change password?
+                            </label>
+                        </div>
+                    </div>
+                    <div id="div_password" class="mb-3" style="display: none;">
+                        <label class="form-label">Password</label>
+                        <input name="password" type="password" class="form-control">
                     </div>
 
                     <button type="submit" class="btn btn-primary me-2">Submit</button>
@@ -76,4 +87,14 @@
     <script src="{{ asset('template') }}/assets/js/dashboard-light.js"></script>
     <!-- End custom js for this page -->
 
+    <script>
+        function showDivPassword(){
+            console.log($('#checkbox_change_password').is(':checked'))
+            if($('#checkbox_change_password').is(':checked')){
+                $('#div_password').show();
+            }else{
+                $('#div_password').hide();
+            }
+        }
+    </script>
 @endsection

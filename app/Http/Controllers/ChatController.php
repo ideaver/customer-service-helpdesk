@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chat;
+use App\Models\ChatTemplate;
 use App\Models\Thread;
-use App\Models\ThreadCategory;
+use App\Models\ThreadTopic;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
@@ -13,10 +14,41 @@ class ChatController extends Controller
 {
     public function chat(Request $request, $target_thread_id = null)
     {
-        $user = Auth::user();
-        $threads = Thread::with('category', 'user1', 'user1.role')->with(['non_read_chat' => function ($q) use ($user) {$q->where('created_by', '<>', $user->user_id);}])->whereNull('user_id_2')->orWhere('user_id_2', $user->user_id)->get();
+        $query_search = null;
+        if (isset($request->q) && !empty($request->q)) {
+            $query_search = $request->q;
+        }
 
-        $target_thread = Thread::with('category', 'user1', 'user1.role')->where('thread_id', $target_thread_id)->first();
+        $user = Auth::user();
+        $threads = Thread::with('topic', 'user1', 'user1.role', 'user2')
+            ->with(['non_read_chat' => function ($q) use ($user) {$q->where('created_by', '<>', $user->user_id);}])
+            ->where(function ($q) use ($user) {
+                // $q->whereNull('user_id_2')
+                //     ->orWhere('user_id_2', $user->user_id);
+            })
+            ->when($query_search, function ($q) use ($query_search) {
+                $q->whereHas('topic', function ($q) use ($query_search) {
+                    $q->where('title', 'LIKE', '%' . $query_search . '%');
+                })->orWhereHas('user1', function ($q) use ($query_search) {
+                    $q->where('fullname', 'LIKE', '%' . $query_search . '%')
+                        ->orWhere('phone', 'LIKE', '%' . $query_search . '%');
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $threads->sortBy(function ($item) {
+            $priority_1 = 1;
+            $priority_2 = 2;
+
+            if ($item->non_read_chat->first()) {
+                return $priority_1 . $item->non_read_chat->first()->created_at;
+            } else {
+                return $priority_2 . $item->created_at;
+            }
+        });
+
+        $target_thread = Thread::with('topic', 'user1', 'user1.role')->where('thread_id', $target_thread_id)->first();
         $chats = Chat::with('created_by_user')->where('thread_id', $target_thread_id)->orderBy('created_at', 'asc')->get();
 
         $data = [
@@ -26,17 +58,42 @@ class ChatController extends Controller
             "target_thread_id" => $target_thread_id,
             "target_thread" => $target_thread,
             "chats" => $chats,
+            "chat_templates" => ChatTemplate::get(),
         ];
 
         return view('chat', $data);
     }
 
-    public function actionGetCategory()
+    public function actionGetTopic()
     {
-        $list_data = ThreadCategory::get();
+        $list_data = ThreadTopic::get();
         return response()->json([
             'data' => [
-                'categories' => $list_data,
+                'topics' => $list_data,
+            ],
+        ]);
+    }
+
+    public function actionGetThread()
+    {
+        $list_data = Thread::with('topic', 'user1', 'user1.role', 'user2')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'threads' => $list_data,
+            ],
+        ]);
+    }
+
+    public function actionGetChat(Request $request)
+    {
+        $list_data = Chat::with('created_by_user')->where('thread_id', $request->thread_id)->orderBy('created_at', 'asc')->get();
+
+        return response()->json([
+            'data' => [
+                'chats' => $list_data,
             ],
         ]);
     }
@@ -45,7 +102,7 @@ class ChatController extends Controller
     {
         /*
         thread_id  *nullable
-        category *nullable
+        topic *nullable
         created_by *not null
         image_id *nullable
         message *not null
@@ -63,7 +120,7 @@ class ChatController extends Controller
                 }
             } else {
                 $thread = new Thread;
-                $thread->thread_category_id = $request->category;
+                $thread->thread_topic_id = $request->topic;
                 $thread->user_id_1 = $request->created_by;
                 $thread->thread_no = 'CH' . time();
                 $thread->save();
@@ -72,6 +129,59 @@ class ChatController extends Controller
             $chat = new Chat;
             $chat->thread_id = $thread->thread_id;
             $chat->message = $request->message;
+            $chat->created_by = $request->created_by;
+            $chat->save();
+
+            DB::commit();
+
+            $chat = Chat::with('created_by_user')->where('chat_id', $chat->chat_id)->first();
+            $chat->updated_at_message = $chat->updated_at->format('H:i');
+
+            return response()->json(['status_code' => 200, 'message' => 'Success to save message',
+                'data' => [
+                    'thread' => $thread,
+                    'chat' => $chat,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return response()->json(['status_code' => 201, 'message' => 'Failed to save message ' . $e->getMessage()]);
+        }
+
+    }
+
+    public function actionUploadChat(Request $request, $thread_id)
+    {
+        /*
+        thread_id  *nullable
+        created_by *not null
+        image_id *nullable
+         */
+
+        DB::beginTransaction();
+        try {
+            $thread = Thread::find($request->thread_id);
+
+            if (empty($thread->user_id_2) && $thread->user_id_1 != $request->created_by) {
+                $thread->user_id_2 = $request->created_by;
+                $thread->status = 1;
+                $thread->save();
+            }
+
+            $chat = new Chat;
+            $chat->thread_id = $thread->thread_id;
+            if ($request->hasFile('image_file')) {
+                $image_file = $request->file('image_file');
+
+                $filename = pathinfo($image_file->getClientOriginalName(), PATHINFO_FILENAME);
+                $ext = pathinfo($image_file->getClientOriginalName(), PATHINFO_EXTENSION);
+
+                $filename_new = time() . '_' . $filename . '.' . $ext;
+
+                $path = $image_file->move(public_path('uploads'), $filename_new);
+                $chat->image_url = '/uploads/' . $filename_new;
+            }
             $chat->created_by = $request->created_by;
             $chat->save();
 
@@ -127,7 +237,7 @@ class ChatController extends Controller
 
             // DB::commit();
 
-            return response()->json(['status_code' => 200, 'message' => 'Success to read message']);
+            return response()->json(['status_code' => 200, 'message' => 'Success to close message']);
         } catch (\Exception $e) {
             // DB::rollback();
 
@@ -138,10 +248,20 @@ class ChatController extends Controller
 
     public function actionRating(Request $request)
     {
-        /*
-    thread_id  *not null
-    rating  *not null
-     */
+        // DB::beginTransaction();
+        try {
+            $thread = Thread::find($request->thread_id);
+            $thread->rating = $request->rating;
+            $thread->save();
+
+            // DB::commit();
+
+            return response()->json(['status_code' => 200, 'message' => 'Success to rating message']);
+        } catch (\Exception $e) {
+            // DB::rollback();
+
+            return response()->json(['status_code' => 201, 'message' => 'Failed to save message ' . $e->getMessage()]);
+        }
 
     }
 }

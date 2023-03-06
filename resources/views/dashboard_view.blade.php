@@ -201,7 +201,7 @@
             </div>
             <p class="text-muted">Sales are activities related to selling or the number of goods or services sold in a given time period.</p>
             <div id="monthlySalesChart"></div>
-          </div> 
+          </div>
         </div>
       </div>
       <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
@@ -420,7 +420,7 @@
                 </tbody>
               </table>
             </div>
-          </div> 
+          </div>
         </div>
       </div>
     </div> <!-- row -->
@@ -437,5 +437,5 @@
   	<!-- Custom js for this page -->
     <script src="{{ asset('template') }}/assets/js/dashboard-light.js"></script>
     <!-- End custom js for this page -->
-  
+
 @endsection

@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Role extends Model
+class ChatTemplate extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'roles';
+    protected $table = 'chat_templates';
 
-    protected $primaryKey = 'role_id';
+    protected $primaryKey = 'chat_template_id';
 
     public $timestamps = true;
 

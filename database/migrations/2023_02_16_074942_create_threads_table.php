@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('threads', function (Blueprint $table) {
             $table->bigInteger('thread_id', true);
             $table->string('thread_no', 32)->nullable();
-            $table->bigInteger('thread_category_id')->nullable();
+            $table->bigInteger('thread_topic_id')->nullable();
             $table->bigInteger('user_id_1')->nullable();
             $table->bigInteger('user_id_2')->nullable();
             $table->tinyInteger('status')->default(0);

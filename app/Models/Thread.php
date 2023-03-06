@@ -19,9 +19,11 @@ class Thread extends Model
 
     protected $guarded = [];
 
-    public function category()
+    protected $hidden = ['updated_at', 'deleted_at'];
+
+    public function topic()
     {
-        return $this->belongsTo(ThreadCategory::class, 'thread_category_id');
+        return $this->belongsTo(ThreadTopic::class, 'thread_topic_id');
     }
 
     public function non_read_chat()

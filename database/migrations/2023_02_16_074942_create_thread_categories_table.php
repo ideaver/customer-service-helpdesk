@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('thread_categories', function (Blueprint $table) {
-            $table->bigInteger('thread_category_id', true);
+        Schema::create('thread_topics', function (Blueprint $table) {
+            $table->bigInteger('thread_topic_id', true);
             $table->string('title', 512)->default('');
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('thread_categories');
+        Schema::dropIfExists('thread_topics');
     }
 };

@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ThreadCategory extends Model
+class ThreadTopic extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'thread_categories';
+    protected $table = 'thread_topics';
 
-    protected $primaryKey = 'thread_category_id';
+    protected $primaryKey = 'thread_topic_id';
 
     public $timestamps = true;
 

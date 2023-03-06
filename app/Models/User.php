@@ -19,6 +19,8 @@ class User extends Authenticatable
 
     protected $guarded = [];
 
+    protected $hidden = ['password', 'fcm_token', 'created_at', 'updated_at', 'deleted_at'];
+
     public function statusToText()
     {
         return $this->is_active == 1 ? 'Active' : 'Non-Active';

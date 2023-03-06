@@ -129,6 +129,40 @@ class AdminController extends Controller
         }
     }
 
+    public function actionUpdate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'role_id' => 'required',
+            'fullname' => 'required',
+            'email' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('message-error', $validator->errors()->first());
+        }
+
+        // DB::beginTransaction();
+        try {
+            $user = User::where('uuid', $request->uuid)->first();
+            $user->role_id = $request->role_id;
+            $user->fullname = $request->fullname;
+            $user->email = $request->email;
+            $user->is_active = $request->is_active;
+
+            if (!empty($request->password)) {
+                $user->password = Hash::make($request->password);
+            }
+
+            $user->save();
+
+            return redirect()->back()->with('message-success', 'Data berhasil diupdate');
+        } catch (\Exception $e) {
+            // DB::rollback();
+
+            return redirect()->back()->with('message-error', $e->getMessage());
+        }
+    }
+
     public function update(Request $request, $uuid = null)
     {
         $roles = Role::get();

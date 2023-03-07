@@ -100,7 +100,7 @@ $auth = Auth::user();
                                                                     @elseif($thread->status == 2)
                                                                     <span class="badge bg-success">Done</span>
                                                                     @endif
-                                                                    {{$thread->topic->title}}
+                                                                    {{$thread->topic->title ?? ''}}
                                                                 </p>
                                                                 @if($thread->non_read_chat->count() > 0)
                                                                 @if(!empty($thread->non_read_chat->first()->image_url))
@@ -174,7 +174,7 @@ $auth = Auth::user();
                                                 @elseif($target_thread->status == 2)
                                                 <span class="badge bg-success">Done</span>
                                                 @endif
-                                                {{$target_thread->topic->title}} - {{$target_thread->updated_at->format('d/M/y')}} </p>
+                                                {{$target_thread->topic->title $thread->topic->title ?? ''}} - {{$target_thread->updated_at->format('d/M/y')}} </p>
                                         </div>
                                     </div>
                                     @if($target_thread)

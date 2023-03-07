@@ -82,7 +82,7 @@ $auth = Auth::user();
                                                     <a href="{{url('chat/'.$thread->thread_id)}}"
                                                         class="d-flex align-items-center">
                                                         <figure class="mb-0 me-2">
-                                                            <img src="{{$thread->user1->image_profile}}"
+                                                            <img src="{{$thread->user1->image_profile ?? ''}}"
                                                                 class="img-xs rounded-circle" alt="user">
                                                         </figure>
                                                         <div
@@ -91,9 +91,9 @@ $auth = Auth::user();
                                                                 <p class="text-muted tx-13">
                                                                     <strong>#{{$thread->thread_no}}</strong></p>
                                                                 <p class="text-body fw-bolder">
-                                                                    {{$thread->user1->fullname}}
-                                                                    ({{$thread->user1->role->title}}) -
-                                                                    {{$thread->user1->phone}}</p>
+                                                                    {{$thread->user1->fullname ?? ''}}
+                                                                    ({{$thread->user1? $thread->user1->role->title : ''}}) -
+                                                                    {{$thread->user1->phone ?? ''}}</p>
                                                                 <p class="text-muted tx-13">
                                                                     @if($thread->status == 1)
                                                                     <span class="badge bg-secondary">Progress</span>
@@ -156,7 +156,7 @@ $auth = Auth::user();
                                         <i data-feather="corner-up-left" id="backToChatList"
                                             class="icon-lg me-2 ms-n2 text-muted d-lg-none"></i>
                                         <figure class="mb-0 me-2">
-                                            <img src="{{$target_thread->user1->image_profile}}" class="img-sm rounded-circle"
+                                            <img src="{{$target_thread->user1->image_profile ?? ''}}" class="img-sm rounded-circle"
                                                 alt="image">
                                         </figure>
                                         <div>
@@ -165,9 +165,9 @@ $auth = Auth::user();
                                                 </strong> - <i data-feather="check" class="text-muted icon-md mb-2px"></i>{{$target_thread->user2->fullname}}</p>
                                                 @endif
                                             <p class="text-body fw-bolder"><a href="{{ url('/user/people-b') }}"
-                                                    style="text-decoration:underline">{{$target_thread->user1->fullname}}
-                                                    ({{$target_thread->user1->role->title}}) -
-                                                    {{$target_thread->user1->phone}}</a>
+                                                    style="text-decoration:underline">{{$target_thread->user1->fullname ?? ''}}
+                                                    ({{$target_thread->user1? $target_thread->user1->role->title : ''}}) -
+                                                    {{$target_thread->user1->phone ?? ''}}</a>
                                             </p>
                                             <p class="text-muted tx-13">@if($target_thread->status == 1)
                                                 <span class="badge bg-secondary">Progress</span>

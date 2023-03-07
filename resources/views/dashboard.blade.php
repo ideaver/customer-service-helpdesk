@@ -173,7 +173,7 @@
                                 @foreach ($threads as $thread)
                                 <tr>
                                     <td>{{$loop->iteration}}</td>
-                                    <td>{{$thread->user1->fullname}}</td>
+                                    <td>{{$thread->user1->fullname ?? ''}}</td>
                                     <td>{{$thread->created_at->format('d M Y H:i')}}</td>
                                     @if($thread->status == 0)
                                     <td><span class="badge bg-danger">Open</span></td>

@@ -76,7 +76,7 @@ class ChatController extends Controller
 
     public function actionGetThread()
     {
-        $list_data = Thread::with('topic', 'user1', 'user1.role', 'user2')
+        $list_data = Thread::with('topic', 'user1', 'user1.role', 'user2', 'last_chat', 'last_chat.created_by_user')
             ->orderBy('created_at', 'desc')
             ->get();
 

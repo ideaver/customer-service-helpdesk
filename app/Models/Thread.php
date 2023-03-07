@@ -26,6 +26,11 @@ class Thread extends Model
         return $this->belongsTo(ThreadTopic::class, 'thread_topic_id');
     }
 
+    public function last_chat()
+    {
+        return $this->hasOne(Chat::class, 'thread_id')->orderBy('created_at', 'desc');
+    }
+
     public function non_read_chat()
     {
         return $this->hasMany(Chat::class, 'thread_id')->whereNull('read_at')->orderBy('created_at', 'desc');

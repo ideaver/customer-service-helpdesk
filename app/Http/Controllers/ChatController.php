@@ -75,7 +75,7 @@ class ChatController extends Controller
         ]);
     }
 
-    public function actionGetThread()
+    public function actionGetThread(Request $request)
     {
         $user_action = User::where('uuid', $request->created_by)->first();
 

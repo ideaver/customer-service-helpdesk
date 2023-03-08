@@ -190,7 +190,7 @@ $(function() {
     flatpickr("#dashboardDate", {
       wrap: true,
       dateFormat: "d-M-Y",
-      defaultDate: "today",
+      // defaultDate: "today",
     });
   }
   // Date Picker - END

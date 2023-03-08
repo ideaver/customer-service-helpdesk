@@ -36,7 +36,7 @@
 @php
 $auth = Auth::user();
 @endphp
-<input type="hidden" name="created_by" value="{{$auth->user_id}}">
+<input type="hidden" name="created_by" value="{{$auth->uuid}}">
 <div class="row chat-wrapper">
     <div class="col-md-12">
         <div class="card">
@@ -67,9 +67,17 @@ $auth = Auth::user();
                                 </div>
                             </div>
                             <div class="aside-body">
-                                <ul class="nav nav-tabs nav-fill mt-3" role="tablist">
-
-
+                                <ul class="nav nav-fill mt-3" role="tablist">
+                                    <li class="nav-item " style="border: 1px solid #eee;">
+                                        <a class="nav-link" href="http://127.0.0.1:8000/chat">
+                                            <span class="menu-title">Main</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item " style="border: 1px solid #eee;">
+                                        <a class="nav-link" href="http://127.0.0.1:8000/dashboard">
+                                            <span class="menu-title">Archived</span>
+                                        </a>
+                                    </li>
                                 </ul>
                                 <div class="tab-content mt-3">
                                     <div class="tab-pane fade show active" id="chats" role="tabpanel"

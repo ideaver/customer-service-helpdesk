@@ -6,6 +6,7 @@ use App\Models\Chat;
 use App\Models\ChatTemplate;
 use App\Models\Thread;
 use App\Models\ThreadTopic;
+use App\Models\User;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
@@ -112,16 +113,35 @@ class ChatController extends Controller
         try {
             if (!empty($request->thread_id)) {
                 $thread = Thread::find($request->thread_id);
+                $user_action = User::where('uuid', $request->created_by)->first();
 
-                if (empty($thread->user_id_2) && $thread->user_id_1 != $request->created_by) {
-                    $thread->user_id_2 = $request->created_by;
+                if (empty($thread->user_id_2) && $thread->user_id_1 != $user_action->user_id) {
+                    $thread->user_id_2 = $user_action->user_id;
                     $thread->status = 1;
                     $thread->save();
                 }
             } else {
+                if ($user_action = User::where('uuid', $request->ch_id)->first()) {
+                    $user_action->uuid = $request->ch_id;
+                    $user_action->fullname = $request->ch_name;
+                    $user_action->image_profile = $request->ch_profile;
+                    $user_action->email = $request->ch_email;
+                    $user_action->phone = $request->ch_phone;
+                    $user_action->save();
+                } else {
+                    $user_action = new User;
+                    $user_action->role_id = $request->ch_as;
+                    $user_action->uuid = $request->ch_id;
+                    $user_action->fullname = $request->ch_name;
+                    $user_action->image_profile = $request->ch_profile;
+                    $user_action->email = $request->ch_email;
+                    $user_action->phone = $request->ch_phone;
+                    $user_action->save();
+                }
+
                 $thread = new Thread;
                 $thread->thread_topic_id = $request->topic;
-                $thread->user_id_1 = $request->created_by;
+                $thread->user_id_1 = $user_action->user_id;
                 $thread->thread_no = 'CH' . time();
                 $thread->save();
             }
@@ -129,7 +149,7 @@ class ChatController extends Controller
             $chat = new Chat;
             $chat->thread_id = $thread->thread_id;
             $chat->message = $request->message;
-            $chat->created_by = $request->created_by;
+            $chat->created_by = $user_action->user_id;
             $chat->save();
 
             DB::commit();
@@ -163,8 +183,10 @@ class ChatController extends Controller
         try {
             $thread = Thread::find($request->thread_id);
 
-            if (empty($thread->user_id_2) && $thread->user_id_1 != $request->created_by) {
-                $thread->user_id_2 = $request->created_by;
+            $user_action = User::where('uuid', $request->created_by)->first();
+
+            if (empty($thread->user_id_2) && $thread->user_id_1 != $user_action->user_id) {
+                $thread->user_id_2 = $user_action->user_id;
                 $thread->status = 1;
                 $thread->save();
             }
@@ -182,7 +204,7 @@ class ChatController extends Controller
                 $path = $image_file->move(public_path('uploads'), $filename_new);
                 $chat->image_url = '/uploads/' . $filename_new;
             }
-            $chat->created_by = $request->created_by;
+            $chat->created_by = $user_action->user_id;
             $chat->save();
 
             DB::commit();
@@ -209,8 +231,9 @@ class ChatController extends Controller
         DB::beginTransaction();
         try {
             $thread = Thread::find($request->thread_id);
+            $user_action = User::where('uuid', $request->created_by)->first();
 
-            $chats = Chat::where('thread_id', $thread->thread_id)->whereNull('read_at')->where('created_by', '<>', $request->created_by)->get();
+            $chats = Chat::where('thread_id', $thread->thread_id)->whereNull('read_at')->where('created_by', '<>', $user_action->user_id)->get();
             foreach ($chats as $chat) {
                 $chat->read_at = now();
                 $chat->save();

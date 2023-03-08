@@ -114,9 +114,10 @@ class ChatController extends Controller
 
         DB::beginTransaction();
         try {
+            $user_action = User::where('uuid', $request->created_by)->first();
+
             if (!empty($request->thread_id)) {
                 $thread = Thread::find($request->thread_id);
-                $user_action = User::where('uuid', $request->created_by)->first();
 
                 if (empty($thread->user_id_2) && $thread->user_id_1 != $user_action->user_id) {
                     $thread->user_id_2 = $user_action->user_id;
@@ -124,24 +125,6 @@ class ChatController extends Controller
                     $thread->save();
                 }
             } else {
-                if ($user_action = User::where('uuid', $request->ch_id)->first()) {
-                    $user_action->uuid = $request->ch_id;
-                    $user_action->fullname = $request->ch_name;
-                    $user_action->image_profile = $request->ch_profile;
-                    $user_action->email = $request->ch_email;
-                    $user_action->phone = $request->ch_phone;
-                    $user_action->save();
-                } else {
-                    $user_action = new User;
-                    $user_action->role_id = $request->ch_as;
-                    $user_action->uuid = $request->ch_id;
-                    $user_action->fullname = $request->ch_name;
-                    $user_action->image_profile = $request->ch_profile;
-                    $user_action->email = $request->ch_email;
-                    $user_action->phone = $request->ch_phone;
-                    $user_action->save();
-                }
-
                 $thread = new Thread;
                 $thread->thread_topic_id = $request->topic;
                 $thread->user_id_1 = $user_action->user_id;

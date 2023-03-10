@@ -246,6 +246,12 @@ License: For each use you must have a valid license purchased only from above li
                });
            }
         });
+
+        OneSignal.push(function() {
+            OneSignal.on('notificationDisplay', function(event) {
+                console.warn('OneSignal notification displayed:', event);
+            });
+        });
     </script>
     <script>
         // const firebaseConfig = {

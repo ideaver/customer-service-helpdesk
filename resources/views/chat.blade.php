@@ -83,7 +83,7 @@ $auth = Auth::user();
                                     <div class="tab-pane fade show active" id="chats" role="tabpanel"
                                         aria-labelledby="chats-tab">
                                         <div>
-                                            <ul class="list-unstyled chat-list px-1">
+                                            <ul id="chat-list" class="list-unstyled chat-list px-1">
                                                 @foreach ($threads as $thread)
                                                 <li
                                                     class="chat-item pe-1 {{$target_thread_id == $thread->thread_id? 'bg-light' : ''}}">

@@ -144,7 +144,7 @@ class ChatController extends Controller
             $chat = Chat::with('created_by_user')->where('chat_id', $chat->chat_id)->first();
             $chat->updated_at_message = $chat->updated_at->format('H:i');
 
-            if ($thread->user_id_1 == $user_action->user_id) {
+            if (!empty($thread->user_id_2) && $thread->user_id_1 == $user_action->user_id) {
                 $data_array = [
                     'chat' => $chat,
                 ];

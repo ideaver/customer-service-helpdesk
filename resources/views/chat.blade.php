@@ -70,12 +70,12 @@ $auth = Auth::user();
                                 <ul class="nav nav-fill mt-3" role="tablist">
                                     <li class="nav-item " style="border: 1px solid #eee;">
                                         <a class="nav-link" href="http://127.0.0.1:8000/chat">
-                                            <span class="menu-title">Main</span>
+                                            <span class="menu-title">Open</span>
                                         </a>
                                     </li>
                                     <li class="nav-item " style="border: 1px solid #eee;">
                                         <a class="nav-link" href="http://127.0.0.1:8000/dashboard">
-                                            <span class="menu-title">Archived</span>
+                                            <span class="menu-title">Close</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -85,7 +85,7 @@ $auth = Auth::user();
                                         <div>
                                             <ul id="chat-list" class="list-unstyled chat-list px-1">
                                                 @foreach ($threads as $thread)
-                                                <li
+                                                <li id="thread-{{$thread->thread_id}}"
                                                     class="chat-item pe-1 {{$target_thread_id == $thread->thread_id? 'bg-light' : ''}}">
                                                     <a href="{{url('chat/'.$thread->thread_id)}}"
                                                         class="d-flex align-items-center">
@@ -110,14 +110,16 @@ $auth = Auth::user();
                                                                     @endif
                                                                     {{$thread->topic->title ?? ''}}
                                                                 </p>
-                                                                @if($thread->non_read_chat->count() > 0)
-                                                                @if(!empty($thread->non_read_chat->first()->image_url))
-                                                                <div class="d-flex align-items-center">
-                                                                    <i data-feather="image" class="text-muted icon-md mb-2px"></i> <p class="text-muted ms-1">Photo</p>
+                                                                <div class="is-non-read-chat">
+                                                                    @if($thread->non_read_chat->count() > 0)
+                                                                    @if(!empty($thread->non_read_chat->first()->image_url))
+                                                                    <div class="d-flex align-items-center">
+                                                                        <i data-feather="image" class="text-muted icon-md mb-2px"></i> <p class="text-muted ms-1">Photo</p>
+                                                                    </div>
+                                                                    @endif
+                                                                    <p class="text-muted tx-13">{{$thread->non_read_chat->first()->message}}</p>
+                                                                    @endif
                                                                 </div>
-                                                                @endif
-                                                                <p class="text-muted tx-13">{{$thread->non_read_chat->first()->message}}</p>
-                     `                                           @endif
 
                                                                 @if(!empty($thread->rating))
                                                                 <div class="stars">
@@ -141,6 +143,7 @@ $auth = Auth::user();
                                                                     {{$thread->non_read_chat->count()}}
                                                                 </div>
                                                                 @endif
+                                                                <!-- <a clas="ms-auto" onclick="alert('LAH')">Archive</a> -->
                                                             </div>
                                                         </div>
                                                     </a>
@@ -198,7 +201,7 @@ $auth = Auth::user();
                                     @endif
                                 </div>
                             </div>
-                            <div class="chat-body" id="chat-container">
+                            <div class="chat-body" id="chat-container" style="min-height: calc(100vh - 340px);">
                                 <ul class="messages" id="chat-messages">
                                     @foreach ($chats as $chat)
                                     <li class="message-item {{$chat->created_by == $target_thread->user_id_1? 'friend' : 'me'}}">
@@ -367,7 +370,9 @@ $auth = Auth::user();
                 created_by: $('input[name=created_by]').val(),
             },
             success: function(result) {
-                console.log(result);
+                var thread_id = $('input[name=thread_id]').val();
+                $('#thread-' + thread_id + ' .rounded-pill').remove();
+                $('#thread-' + thread_id + ' .is-non-read-chat').remove();
             }
         });
     }
@@ -439,9 +444,11 @@ $auth = Auth::user();
     });
 
     function scrollChat(){
-        var chatDiv = $('#chat-container');
-        var height = chatDiv[0].scrollHeight;
-        chatDiv.scrollTop(height);
+        if($('#chat-container').length){
+            var chatDiv = $('#chat-container');
+            var height = chatDiv[0].scrollHeight;
+            chatDiv.scrollTop(height);
+        }
     }
 
     function searchChat(element) {

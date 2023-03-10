@@ -105,6 +105,16 @@ class ChatController extends Controller
 
     public function actionSubmit(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'topic' => 'required|exists:App\Models\ThreadTopic,thread_topic_id',
+            'created_by' => 'required',
+            'message' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('message-error', $validator->errors()->first());
+        }
+
         /*
         thread_id  *nullable
         topic *nullable
@@ -136,6 +146,17 @@ class ChatController extends Controller
             $chat = new Chat;
             $chat->thread_id = $thread->thread_id;
             $chat->message = $request->message;
+            if ($request->hasFile('image_file')) {
+                $image_file = $request->file('image_file');
+
+                $filename = pathinfo($image_file->getClientOriginalName(), PATHINFO_FILENAME);
+                $ext = pathinfo($image_file->getClientOriginalName(), PATHINFO_EXTENSION);
+
+                $filename_new = time() . '_' . $filename . '.' . $ext;
+
+                $path = $image_file->move(public_path('uploads'), $filename_new);
+                $chat->image_url = '/uploads/' . $filename_new;
+            }
             $chat->created_by = $user_action->user_id;
             $chat->save();
 
@@ -147,6 +168,7 @@ class ChatController extends Controller
             if (!empty($thread->user_id_2) && $thread->user_id_1 == $user_action->user_id) {
                 $data_array = [
                     'chat' => $chat,
+                    'routing_app' => '/chatRoom',
                 ];
                 $one_signal_id = User::where('user_id', $thread->user_id_2)->first()->one_signal_id;
                 if (!empty($one_signal_id)) {

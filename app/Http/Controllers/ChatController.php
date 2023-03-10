@@ -11,6 +11,7 @@ use Auth;
 use DB;
 use Illuminate\Http\Request;
 use OneSignal;
+use Validator;
 
 class ChatController extends Controller
 {

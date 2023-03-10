@@ -166,24 +166,28 @@ class ChatController extends Controller
             $chat = Chat::with('created_by_user')->where('chat_id', $chat->chat_id)->first();
             $chat->updated_at_message = $chat->updated_at->format('H:i');
 
-            if (!empty($thread->user_id_2) && $thread->user_id_1 == $user_action->user_id) {
+            $user_send_id = $thread->user_id_1 == $user_action->user_id ? $thread->user_id_2 : $thread->user_id_1;
+
+            if (!empty($user_send_id)) {
                 $data_array = [
                     'chat' => $chat,
                     'routing_app' => '/chatRoom',
                 ];
-                $one_signal_id = User::where('user_id', $thread->user_id_2)->first()->one_signal_id;
-                if (!empty($one_signal_id)) {
-                    try {
-                        $result = OneSignal::sendNotificationToUser(
-                            $chat->message,
-                            $one_signal_id,
-                            $url = null,
-                            $data_array,
-                            $buttons = null,
-                            $schedule = null
-                        );
-                    } catch (\Exception $e) {
+                $user_send_notif = User::where('user_id', $user_send_id)->first();
+                if ($user_send_notif && $one_signal_id = $user_send_notif->one_signal_id) {
+                    if (!empty($one_signal_id)) {
+                        try {
+                            $result = OneSignal::sendNotificationToUser(
+                                $chat->message,
+                                $one_signal_id,
+                                $url = null,
+                                $data_array,
+                                $buttons = null,
+                                $schedule = null
+                            );
+                        } catch (\Exception $e) {
 
+                        }
                     }
                 }
             }

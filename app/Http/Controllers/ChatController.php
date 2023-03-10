@@ -10,6 +10,7 @@ use App\Models\User;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Kutia\Larafirebase\Facades\Larafirebase;
 
 class ChatController extends Controller
 {

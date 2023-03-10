@@ -107,7 +107,7 @@ class ChatController extends Controller
     public function actionSubmit(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'topic' => 'required|exists:App\Models\ThreadTopic,thread_topic_id',
+            // 'topic' => 'required|exists:App\Models\ThreadTopic,thread_topic_id',
             'created_by' => 'required',
             'message' => 'required',
         ]);

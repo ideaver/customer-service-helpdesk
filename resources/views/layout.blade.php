@@ -249,7 +249,7 @@ License: For each use you must have a valid license purchased only from above li
         OneSignal.push(function() {
             OneSignal.on('notificationDisplay', function(event) {
                 if($('#chat-messages').length){
-                    var html = `<li class="message-item me">
+                    var html = `<li class="message-item friend">
                                     <img src="${event.data.chat.created_by_user.image_profile}" class="img-xs rounded-circle"
                                         alt="avatar">
                                     <div class="content">

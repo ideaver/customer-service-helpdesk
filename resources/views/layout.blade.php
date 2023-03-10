@@ -228,7 +228,6 @@ License: For each use you must have a valid license purchased only from above li
             });
         })
     </script>
-    <!-- <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase.js"></script> -->
     <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
     <script>
         window.OneSignal = window.OneSignal || [];
@@ -249,23 +248,28 @@ License: For each use you must have a valid license purchased only from above li
 
         OneSignal.push(function() {
             OneSignal.on('notificationDisplay', function(event) {
+                if($('#chat-messages').length){
+                    var html = `<li class="message-item me">
+                                    <img src="${event.data.chat.created_by_user.image_profile}" class="img-xs rounded-circle"
+                                        alt="avatar">
+                                    <div class="content">
+                                        <div class="message">
+                                            <div class="bubble">
+                                                <p>${event.data.chat.message}</p>
+                                            </div>
+                                            <span>${event.data.chat.updated_at_message}</span>
+                                        </div>
+                                    </div>
+                                </li>`;
+                    $('#chat-messages').append(html);
+
+                    scrollChat();
+                }
                 console.warn('OneSignal notification displayed:', event);
             });
         });
     </script>
     <script>
-        // const firebaseConfig = {
-        //     apiKey: "AIzaSyB7lHtn6L3qVEBngFI_L5RpBgdkf4LsvwQ",
-        //     authDomain: "maimaid-app.firebaseapp.com",
-        //     projectId: "maimaid-app",
-        //     storageBucket: "maimaid-app.appspot.com",
-        //     messagingSenderId: "839314473238",
-        //     appId: "1:839314473238:web:e0747f2f5af518b4dc5037"
-        // };
-
-        // firebase.initializeApp(firebaseConfig);
-        // const messaging = firebase.messaging();
-
         function sendTokenToServer(one_signal_id) {
             $.ajax({
                 type: 'POST',
@@ -281,47 +285,6 @@ License: For each use you must have a valid license purchased only from above li
                 }
             });
         }
-
-    //     async function retreiveToken(){
-    //         // Add the public key generated from the console here.
-    //         // const currentToken = await getToken(messaging, {vapidKey: "BOSvkqf2fdIUf1x70tLbbFtqtjxJdf7ipZEJehw3IkAG17iW26S1vvDvwQCiBnfMp-O5R4AA68wSWIQA9ARs5p0"})
-
-    //         // messaging.getToken().then((currentToken) => {
-    //             // console.log(currentToken);
-    //             // if (currentToken) {
-    //             //     sendTokenToServer(currentToken);
-    //             // } else {
-    //             //     alert('You should allow notification!');
-    //             // }
-    //         // }).catch((err) => {
-    //         //     console.log(err.message);
-    //         // });
-
-    //         messaging
-    //             .requestPermission()
-    //             .then(function () {
-    //                 return messaging.getToken()
-    //             })
-    //             .then(function (response) {
-    //                 console.log(response);
-    //                 sendTokenToServer(response);
-    //             }).catch(function (error) {
-    //                 alert(error);
-    //             });
-    //     }
-    //     retreiveToken();
-    //     // messaging.onTokenRefresh(()=>{
-    //     //     retreiveToken();
-    //     // });
-
-    //     messaging.onMessage(function (payload) {
-    //         const title = payload.notification.title;
-    //         const options = {
-    //             body: payload.notification.body,
-    //             icon: payload.notification.icon,
-    //         };
-    //         new Notification(title, options);
-    //     });
     </script>
     @if (Session::has('message-error'))
     <script>

@@ -141,32 +141,34 @@ class ChatController extends Controller
 
             DB::commit();
 
-            $push_content = '';
-            try {
-                $one_signal_id = User::whereNotNull('one_signal_id')->first()->one_signal_id;
-
-                $result = OneSignal::sendNotificationToUser(
-                    $chat->message,
-                    $one_signal_id,
-                    $url = null,
-                    $data = null,
-                    $buttons = null,
-                    $schedule = null
-                );
-
-                $push_content = json_encode($result);
-            } catch (\Exception $e) {
-                $push_content = json_encode($e);
-            }
-
             $chat = Chat::with('created_by_user')->where('chat_id', $chat->chat_id)->first();
             $chat->updated_at_message = $chat->updated_at->format('H:i');
+
+            if ($thread->user_id_1 == $user_action->user_id) {
+                $data_array = [
+                    'chat' => $chat,
+                ];
+                $one_signal_id = User::where('user_id', $thread->user_id_2)->first()->one_signal_id;
+                if (!empty($one_signal_id)) {
+                    try {
+                        $result = OneSignal::sendNotificationToUser(
+                            $chat->message,
+                            $one_signal_id,
+                            $url = null,
+                            $data_array,
+                            $buttons = null,
+                            $schedule = null
+                        );
+                    } catch (\Exception $e) {
+
+                    }
+                }
+            }
 
             return response()->json(['status_code' => 200, 'message' => 'Success to save message',
                 'data' => [
                     'thread' => $thread,
                     'chat' => $chat,
-                    'push_content' => $push_content,
                 ],
             ]);
         } catch (\Exception $e) {

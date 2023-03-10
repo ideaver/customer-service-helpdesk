@@ -148,7 +148,7 @@ License: For each use you must have a valid license purchased only from above li
                                     </ul>
                                     <ul class="list-unstyled p-1">
                                         <li class="dropdown-item py-2">
-                                            <a href="{{route('signout')}}" class="text-body ms-0">
+                                            <a href="{{route('signout')}}" onclick="localStorage.clear()" class="text-body ms-0">
                                                 <i class="me-2 icon-md" data-feather="log-out"></i>
                                                 <span>Log Out</span>
                                             </a>

@@ -140,6 +140,27 @@ class ChatController extends Controller
 
             DB::commit();
 
+            $fcm_content = '';
+            try {
+                $fcmTokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
+
+                //Notification::send(null,new SendPushNotification($request->title,$request->message,$fcmTokens));
+
+                /* or */
+
+                //auth()->user()->notify(new SendPushNotification($title,$message,$fcmTokens));
+
+                /* or */
+
+                $result = Larafirebase::withTitle('New Notification')
+                    ->withBody($chat->message)
+                    ->sendMessage($fcmTokens);
+
+                $fcm_content = json_encode($result);
+            } catch (\Exception $e) {
+                $fcm_content = json_encode($e);
+            }
+
             $chat = Chat::with('created_by_user')->where('chat_id', $chat->chat_id)->first();
             $chat->updated_at_message = $chat->updated_at->format('H:i');
 
@@ -147,6 +168,7 @@ class ChatController extends Controller
                 'data' => [
                     'thread' => $thread,
                     'chat' => $chat,
+                    'fcm_content' => $fcm_content,
                 ],
             ]);
         } catch (\Exception $e) {

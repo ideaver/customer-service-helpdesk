@@ -231,7 +231,7 @@ License: For each use you must have a valid license purchased only from above li
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js";
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -286,12 +286,10 @@ License: For each use you must have a valid license purchased only from above li
         //     retreiveToken();
         // });
 
-        // messaging.onMessage((payload)=>{
-        //     console.log('Message received');
-        //     console.log(payload);
-
-        //     location.reload();
-        // });
+        onMessage(messaging, (payload) => {
+            console.log('Message received. ', payload);
+            // ...
+        });
     </script>
     @if (Session::has('message-error'))
     <script>

@@ -67,17 +67,17 @@ class UserController extends Controller
     public function actionSaveToken(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'uuid' => 'required',
+            'created_by' => 'required',
             'one_signal_id' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('message-error', $validator->errors()->first());
+            return response()->json(['status_code' => 200, 'message' => $validator->errors()->first()]);
         }
 
         // DB::beginTransaction();
         try {
-            $user = User::where('uuid', $request->uuid)->first();
+            $user = User::where('uuid', $request->created_by)->first();
             $user->one_signal_id = $request->one_signal_id;
 
             $user->save();

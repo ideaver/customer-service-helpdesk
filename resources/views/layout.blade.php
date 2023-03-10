@@ -228,14 +228,8 @@ License: For each use you must have a valid license purchased only from above li
             });
         })
     </script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase.js"></script>
     <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-messaging.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyB7lHtn6L3qVEBngFI_L5RpBgdkf4LsvwQ",
             authDomain: "maimaid-app.firebaseapp.com",
@@ -245,10 +239,8 @@ License: For each use you must have a valid license purchased only from above li
             appId: "1:839314473238:web:e0747f2f5af518b4dc5037"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        // Retrieve Firebase Messaging object.
-        const messaging = getMessaging(app);
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
 
         function sendTokenToServer(fcm_token) {
             $.ajax({
@@ -268,27 +260,43 @@ License: For each use you must have a valid license purchased only from above li
 
         async function retreiveToken(){
             // Add the public key generated from the console here.
-            const currentToken = await getToken(messaging, {vapidKey: "BOSvkqf2fdIUf1x70tLbbFtqtjxJdf7ipZEJehw3IkAG17iW26S1vvDvwQCiBnfMp-O5R4AA68wSWIQA9ARs5p0"})
+            // const currentToken = await getToken(messaging, {vapidKey: "BOSvkqf2fdIUf1x70tLbbFtqtjxJdf7ipZEJehw3IkAG17iW26S1vvDvwQCiBnfMp-O5R4AA68wSWIQA9ARs5p0"})
 
             // messaging.getToken().then((currentToken) => {
-                console.log(currentToken);
-                if (currentToken) {
-                    sendTokenToServer(currentToken);
-                } else {
-                    alert('You should allow notification!');
-                }
+                // console.log(currentToken);
+                // if (currentToken) {
+                //     sendTokenToServer(currentToken);
+                // } else {
+                //     alert('You should allow notification!');
+                // }
             // }).catch((err) => {
             //     console.log(err.message);
             // });
+
+            messaging
+                .requestPermission()
+                .then(function () {
+                    return messaging.getToken()
+                })
+                .then(function (response) {
+                    console.log(response);
+                    sendTokenToServer(response);
+                }).catch(function (error) {
+                    alert(error);
+                });
         }
         retreiveToken();
         // messaging.onTokenRefresh(()=>{
         //     retreiveToken();
         // });
 
-        onMessage(messaging, (payload) => {
-            console.log('Message received. ', payload);
-            // ...
+        messaging.onMessage(function (payload) {
+            const title = payload.notification.title;
+            const options = {
+                body: payload.notification.body,
+                icon: payload.notification.icon,
+            };
+            new Notification(title, options);
         });
     </script>
     @if (Session::has('message-error'))

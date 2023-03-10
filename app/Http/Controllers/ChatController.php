@@ -10,7 +10,6 @@ use App\Models\User;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
-use Kutia\Larafirebase\Services\Larafirebase;
 
 class ChatController extends Controller
 {
@@ -142,21 +141,45 @@ class ChatController extends Controller
             DB::commit();
 
             $fcm_content = '';
-            $fcm_firebase = new Larafirebase;
             try {
                 $fcmTokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
 
-                //Notification::send(null,new SendPushNotification($request->title,$request->message,$fcmTokens));
+                $url = 'https://fcm.googleapis.com/fcm/send';
+                $serverKey = env('FIREBASE_SERVER_KEY');
 
-                /* or */
+                $data = [
+                    "registration_ids" => $fcmTokens,
+                    "notification" => [
+                        "title" => 'New notification',
+                        "body" => $chat->message,
+                    ],
+                ];
+                $encodedData = json_encode($data);
 
-                //auth()->user()->notify(new SendPushNotification($title,$message,$fcmTokens));
+                $headers = [
+                    'Authorization:key=' . $serverKey,
+                    'Content-Type: application/json',
+                ];
 
-                /* or */
+                $ch = curl_init();
 
-                $result = $fcm_firebase->withTitle('New Notification')
-                    ->withBody($chat->message)
-                    ->sendMessage($fcmTokens);
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+                // Disabling SSL Certificate support temporarly
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
+                // Execute post
+                $result = curl_exec($ch);
+                if ($result === false) {
+                    die('Curl failed: ' . curl_error($ch));
+                }
+                // Close connection
+                curl_close($ch);
+                // FCM response
 
                 $fcm_content = json_encode($result);
             } catch (\Exception $e) {

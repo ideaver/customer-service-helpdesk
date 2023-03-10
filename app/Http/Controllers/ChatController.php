@@ -113,7 +113,7 @@ class ChatController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('message-error', $validator->errors()->first());
+            return response()->json(['status_code' => 201, 'message' => $validator->errors()->first()]);
         }
 
         /*

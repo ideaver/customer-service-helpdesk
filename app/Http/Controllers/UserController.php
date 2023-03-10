@@ -60,7 +60,37 @@ class UserController extends Controller
         } catch (\Exception $e) {
             // DB::rollback();
 
-            return redirect()->back()->with('message-error', $e->getMessage());
+            return response()->json(['status_code' => 200, 'message' => 'message-error', $e->getMessage()]);
+        }
+    }
+
+    public function actionSaveToken(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'uuid' => 'required',
+            'one_signal_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('message-error', $validator->errors()->first());
+        }
+
+        // DB::beginTransaction();
+        try {
+            $user = User::where('uuid', $request->uuid)->first();
+            $user->one_signal_id = $request->one_signal_id;
+
+            $user->save();
+
+            return response()->json(['status_code' => 200, 'message' => 'Success to save-update User',
+                'data' => [
+                    'user' => $user,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            // DB::rollback();
+
+            return response()->json(['status_code' => 200, 'message' => 'message-error', $e->getMessage()]);
         }
     }
 }

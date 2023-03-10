@@ -52,7 +52,7 @@ class AdminController extends Controller
     {
         $item = Auth::user();
 
-        $item->fcm_token = $request->fcm_token;
+        $item->one_signal_id = $request->one_signal_id;
         $item->save();
 
         return response()->json(['message' => 'Success save token']);

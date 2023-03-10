@@ -142,6 +142,7 @@ class ChatController extends Controller
             DB::commit();
 
             $fcm_content = '';
+            $fcm_firebase = new Larafirebase;
             try {
                 $fcmTokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
 
@@ -153,7 +154,7 @@ class ChatController extends Controller
 
                 /* or */
 
-                $result = Larafirebase::withTitle('New Notification')
+                $result = $fcm_firebase->withTitle('New Notification')
                     ->withBody($chat->message)
                     ->sendMessage($fcmTokens);
 

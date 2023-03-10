@@ -10,6 +10,7 @@ use App\Models\User;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use OneSignal;
 
 class ChatController extends Controller
 {
@@ -140,50 +141,22 @@ class ChatController extends Controller
 
             DB::commit();
 
-            $fcm_content = '';
+            $push_content = '';
             try {
-                $fcmTokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
+                $one_signal_id = User::whereNotNull('one_signal_id')->first()->one_signal_id;
 
-                $url = 'https://fcm.googleapis.com/fcm/send';
-                $serverKey = env('FIREBASE_SERVER_KEY');
+                $result = OneSignal::sendNotificationToUser(
+                    $chat->message,
+                    $one_signal_id,
+                    $url = null,
+                    $data = null,
+                    $buttons = null,
+                    $schedule = null
+                );
 
-                $data = [
-                    "registration_ids" => $fcmTokens,
-                    "notification" => [
-                        "title" => 'New notification',
-                        "body" => $chat->message,
-                    ],
-                ];
-                $encodedData = json_encode($data);
-
-                $headers = [
-                    'Authorization:key=' . $serverKey,
-                    'Content-Type: application/json',
-                ];
-
-                $ch = curl_init();
-
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-                // Disabling SSL Certificate support temporarly
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-                // Execute post
-                $result = curl_exec($ch);
-                if ($result === false) {
-                    die('Curl failed: ' . curl_error($ch));
-                }
-                // Close connection
-                curl_close($ch);
-                // FCM response
-
-                $fcm_content = json_encode($result);
+                $push_content = json_encode($result);
             } catch (\Exception $e) {
-                $fcm_content = json_encode($e);
+                $push_content = json_encode($e);
             }
 
             $chat = Chat::with('created_by_user')->where('chat_id', $chat->chat_id)->first();
@@ -193,7 +166,7 @@ class ChatController extends Controller
                 'data' => [
                     'thread' => $thread,
                     'chat' => $chat,
-                    'fcm_content' => $fcm_content,
+                    'push_content' => $push_content,
                 ],
             ]);
         } catch (\Exception $e) {

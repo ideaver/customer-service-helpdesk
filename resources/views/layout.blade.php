@@ -228,21 +228,39 @@ License: For each use you must have a valid license purchased only from above li
             });
         })
     </script>
-    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase.js"></script>
-    <script type="module">
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7lHtn6L3qVEBngFI_L5RpBgdkf4LsvwQ",
-            authDomain: "maimaid-app.firebaseapp.com",
-            projectId: "maimaid-app",
-            storageBucket: "maimaid-app.appspot.com",
-            messagingSenderId: "839314473238",
-            appId: "1:839314473238:web:e0747f2f5af518b4dc5037"
-        };
+    <!-- <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase.js"></script> -->
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+    <script>
+        window.OneSignal = window.OneSignal || [];
+        OneSignal.push(function() {
+            OneSignal.init({
+                appId: "c7f71e70-2411-472c-a999-bc4bac1cac8a",
+            });
+        });
 
-        firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
+        OneSignal.push(function() {
+           if(localStorage.getItem('os-user') === null) {
+               OneSignal.getUserId(function(userId) {
+                    localStorage.setItem('os-user', userId);
+                    sendTokenToServer(userId);
+               });
+           }
+        });
+    </script>
+    <script>
+        // const firebaseConfig = {
+        //     apiKey: "AIzaSyB7lHtn6L3qVEBngFI_L5RpBgdkf4LsvwQ",
+        //     authDomain: "maimaid-app.firebaseapp.com",
+        //     projectId: "maimaid-app",
+        //     storageBucket: "maimaid-app.appspot.com",
+        //     messagingSenderId: "839314473238",
+        //     appId: "1:839314473238:web:e0747f2f5af518b4dc5037"
+        // };
 
-        function sendTokenToServer(fcm_token) {
+        // firebase.initializeApp(firebaseConfig);
+        // const messaging = firebase.messaging();
+
+        function sendTokenToServer(one_signal_id) {
             $.ajax({
                 type: 'POST',
                 url: base_url + 'user/save-token',
@@ -250,7 +268,7 @@ License: For each use you must have a valid license purchased only from above li
                     'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
                 },
                 data: {
-                    fcm_token: fcm_token,
+                    one_signal_id: one_signal_id,
                 },
                 success: function(result) {
                     console.log(result);
@@ -258,46 +276,46 @@ License: For each use you must have a valid license purchased only from above li
             });
         }
 
-        async function retreiveToken(){
-            // Add the public key generated from the console here.
-            // const currentToken = await getToken(messaging, {vapidKey: "BOSvkqf2fdIUf1x70tLbbFtqtjxJdf7ipZEJehw3IkAG17iW26S1vvDvwQCiBnfMp-O5R4AA68wSWIQA9ARs5p0"})
+    //     async function retreiveToken(){
+    //         // Add the public key generated from the console here.
+    //         // const currentToken = await getToken(messaging, {vapidKey: "BOSvkqf2fdIUf1x70tLbbFtqtjxJdf7ipZEJehw3IkAG17iW26S1vvDvwQCiBnfMp-O5R4AA68wSWIQA9ARs5p0"})
 
-            // messaging.getToken().then((currentToken) => {
-                // console.log(currentToken);
-                // if (currentToken) {
-                //     sendTokenToServer(currentToken);
-                // } else {
-                //     alert('You should allow notification!');
-                // }
-            // }).catch((err) => {
-            //     console.log(err.message);
-            // });
+    //         // messaging.getToken().then((currentToken) => {
+    //             // console.log(currentToken);
+    //             // if (currentToken) {
+    //             //     sendTokenToServer(currentToken);
+    //             // } else {
+    //             //     alert('You should allow notification!');
+    //             // }
+    //         // }).catch((err) => {
+    //         //     console.log(err.message);
+    //         // });
 
-            messaging
-                .requestPermission()
-                .then(function () {
-                    return messaging.getToken()
-                })
-                .then(function (response) {
-                    console.log(response);
-                    sendTokenToServer(response);
-                }).catch(function (error) {
-                    alert(error);
-                });
-        }
-        retreiveToken();
-        // messaging.onTokenRefresh(()=>{
-        //     retreiveToken();
-        // });
+    //         messaging
+    //             .requestPermission()
+    //             .then(function () {
+    //                 return messaging.getToken()
+    //             })
+    //             .then(function (response) {
+    //                 console.log(response);
+    //                 sendTokenToServer(response);
+    //             }).catch(function (error) {
+    //                 alert(error);
+    //             });
+    //     }
+    //     retreiveToken();
+    //     // messaging.onTokenRefresh(()=>{
+    //     //     retreiveToken();
+    //     // });
 
-        messaging.onMessage(function (payload) {
-            const title = payload.notification.title;
-            const options = {
-                body: payload.notification.body,
-                icon: payload.notification.icon,
-            };
-            new Notification(title, options);
-        });
+    //     messaging.onMessage(function (payload) {
+    //         const title = payload.notification.title;
+    //         const options = {
+    //             body: payload.notification.body,
+    //             icon: payload.notification.icon,
+    //         };
+    //         new Notification(title, options);
+    //     });
     </script>
     @if (Session::has('message-error'))
     <script>

@@ -74,7 +74,7 @@ $auth = Auth::user();
                                         </a>
                                     </li>
                                     <li class="nav-item " style="border: 1px solid #eee;">
-                                        <a class="nav-link" href="{{url('chat-close')}}">
+                                        <a class="nav-link" href="{{url('chat?status=close')}}">
                                             <span class="menu-title">Close</span>
                                         </a>
                                     </li>
@@ -87,7 +87,7 @@ $auth = Auth::user();
                                                 @foreach ($threads as $thread)
                                                 <li id="thread-{{$thread->thread_id}}"
                                                     class="chat-item pe-1 {{$target_thread_id == $thread->thread_id? 'bg-light' : ''}}">
-                                                    <a href="{{url('chat/'.$thread->thread_id)}}"
+                                                    <a href="{{url('chat/'.$thread->thread_id)}}{{$thread->status == 2? '?status=close' : ''}}"
                                                         class="d-flex align-items-center">
                                                         <figure class="mb-0 me-2">
                                                             <img src="{{$thread->user1->image_profile ?? ''}}"
@@ -117,7 +117,7 @@ $auth = Auth::user();
                                                                         <i data-feather="image" class="text-muted icon-md mb-2px"></i> <p class="text-muted ms-1">Photo</p>
                                                                     </div>
                                                                     @endif
-                                                                    <p class="text-muted tx-13">{{$thread->non_read_chat->first()->message}}</p>
+                                                                    <p class="text-muted tx-13">{{!empty($thread->non_read_chat->first()->message)? $thread->non_read_chat->first()->message == 'null'? '' : $thread->non_read_chat->first()->message : ''}}</p>
                                                                     @endif
                                                                 </div>
 
@@ -213,7 +213,7 @@ $auth = Auth::user();
                                                     @if(!empty($chat->image_url))
                                                     <img src="{{url($chat->image_url)}}" onclick="openPopup(this.src)" style="width: 180px;">
                                                     @endif
-                                                    <p>{{$chat->message}}</p>
+                                                    <p>{{!empty($chat->message)? $chat->message == 'null'? '' : $chat->message : ''}}</p>
                                                 </div>
                                                 <span>{{$chat->created_at->format('H:i')}}</span>
                                             </div>

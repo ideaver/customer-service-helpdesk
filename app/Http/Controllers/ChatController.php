@@ -22,19 +22,38 @@ class ChatController extends Controller
             $query_search = $request->q;
         }
 
+        $query_status = null;
+        if (isset($request->status) && !empty($request->status)) {
+            $query_status = $request->status;
+        }else{
+            $query_status = 'open';
+        }
+
         $user = Auth::user();
         $threads = Thread::with('topic', 'user1', 'user1.role', 'user2')
             ->with(['non_read_chat' => function ($q) use ($user) {$q->where('created_by', '<>', $user->user_id);}])
+            ->when($query_status, function ($q) use ($query_status) {
+                if($query_status == 'close'){
+                    $q->where('status', 2);
+                }else{
+                    $q->whereIn('status', [0,1]);
+                }
+            })
             ->where(function ($q) use ($user) {
                 // $q->whereNull('user_id_2')
                 //     ->orWhere('user_id_2', $user->user_id);
             })
             ->when($query_search, function ($q) use ($query_search) {
-                $q->whereHas('topic', function ($q) use ($query_search) {
-                    $q->where('title', 'LIKE', '%' . $query_search . '%');
-                })->orWhereHas('user1', function ($q) use ($query_search) {
-                    $q->where('fullname', 'LIKE', '%' . $query_search . '%')
-                        ->orWhere('phone', 'LIKE', '%' . $query_search . '%');
+                $q->where(function($q) use ($query_search){
+                    $q->whereHas('topic', function ($q) use ($query_search) {
+                        $q->where('title', 'LIKE', '%' . $query_search . '%');
+                    })->orWhereHas('user1', function ($q) use ($query_search) {
+                        $q->where('fullname', 'LIKE', '%' . $query_search . '%')
+                            ->orWhere('phone', 'LIKE', '%' . $query_search . '%');
+                    })->orWhereHas('user2', function ($q) use ($query_search) {
+                        $q->where('fullname', 'LIKE', '%' . $query_search . '%')
+                            ->orWhere('phone', 'LIKE', '%' . $query_search . '%');
+                    })->orwhere('thread_no', 'LIKE', '%' . $query_search . '%');
                 });
             })
             ->orderBy('created_at', 'desc')

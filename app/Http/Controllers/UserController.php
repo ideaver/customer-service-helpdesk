@@ -24,7 +24,6 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'ch_name' => 'required',
-            'ch_profile' => 'required',
             'ch_email' => 'required',
             'ch_phone' => 'required',
             'ch_as' => 'required|exists:App\Models\Role,role_id',
@@ -45,7 +44,13 @@ class UserController extends Controller
                 $user->is_active = 1;
             }
             $user->role_id = $request->ch_as;
-            $user->image_profile = $request->ch_profile;
+
+            if($user->role_id == 3){
+                $user->image_profile = 'https://api.dicebear.com/5.x/fun-emoji/png?seed=Loki';
+            }else if($user->role_id == 4){
+                $user->image_profile = 'https://api.dicebear.com/5.x/fun-emoji/png?seed=Felix';
+            }
+
             $user->fullname = $request->ch_name;
             $user->email = $request->ch_email;
             $user->email = $request->ch_phone;

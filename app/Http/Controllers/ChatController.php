@@ -173,6 +173,8 @@ class ChatController extends Controller
                     'chat' => $chat,
                     'routing_app' => '/chatRoom',
                 ];
+
+                $url_redirect = url('chat/' . $thread->thread_id);
                 $user_send_notif = User::where('user_id', $user_send_id)->first();
                 if ($user_send_notif && $one_signal_id = $user_send_notif->one_signal_id) {
                     if (!empty($one_signal_id)) {
@@ -180,7 +182,7 @@ class ChatController extends Controller
                             $result = OneSignal::sendNotificationToUser(
                                 $chat->message,
                                 $one_signal_id,
-                                $url = null,
+                                $url_redirect,
                                 $data_array,
                                 $buttons = null,
                                 $schedule = null

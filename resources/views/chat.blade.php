@@ -60,7 +60,7 @@ $auth = Auth::user();
                                 </div>
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="searchForm"
-                                        placeholder="Search Topic, Name, Phone or Admin" onkeydown="searchChat(this)">
+                                    placeholder="Search Topic, Name, Phone or Admin" onkeydown="searchChat(this)">
                                     <span class="input-group-text">
                                         <i data-feather="search" class="cursor-pointer"></i>
                                     </span>
@@ -69,12 +69,12 @@ $auth = Auth::user();
                             <div class="aside-body">
                                 <ul class="nav nav-fill mt-3" role="tablist">
                                     <li class="nav-item " style="border: 1px solid #eee;">
-                                        <a class="nav-link" href="http://127.0.0.1:8000/chat">
+                                        <a class="nav-link" href="{{url('chat')}}">
                                             <span class="menu-title">Open</span>
                                         </a>
                                     </li>
                                     <li class="nav-item " style="border: 1px solid #eee;">
-                                        <a class="nav-link" href="http://127.0.0.1:8000/dashboard">
+                                        <a class="nav-link" href="{{url('chat-close')}}">
                                             <span class="menu-title">Close</span>
                                         </a>
                                     </li>

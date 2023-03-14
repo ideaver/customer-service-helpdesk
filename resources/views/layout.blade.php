@@ -239,7 +239,9 @@ License: For each use you must have a valid license purchased only from above li
 
         OneSignal.push(function() {
            if(localStorage.getItem('os-user') === null) {
+               console.log('os-user' + localStorage.getItem('os-user'))
                OneSignal.getUserId(function(userId) {
+                    console.log(userId)
                     localStorage.setItem('os-user', userId);
                     sendTokenToServer(userId);
                });

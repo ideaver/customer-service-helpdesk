@@ -17,6 +17,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TemplateChatController;
 use App\Http\Controllers\TopicChatController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserDeviceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,6 +62,11 @@ Route::group(['middleware' => ['my.auth']], function () {
         Route::post('/create', [TopicChatController::class, "actionCreate"])->name('post.topic-chat.create');
         Route::get('/{uuid}', [TopicChatController::class, "update"]);
         Route::post('/update', [TopicChatController::class, "actionUpdate"])->name('post.topic-chat.update');
+    });
+
+    Route::group(['prefix' => 'device'], function () {
+        Route::get('/', [UserDeviceController::class, "list"]);
+        Route::post('/dt', [UserDeviceController::class, "getDatatables"]);
     });
 
     Route::group(['prefix' => 'template-chat'], function () {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserDevice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -55,11 +56,23 @@ class AdminController extends Controller
         $item->one_signal_id = $request->one_signal_id;
         $item->save();
 
+        $user_device = new UserDevice();
+        $user_device->user_id = $item->user_id;
+        $user_device->one_signal_id = $request->one_signal_id;
+        $user_device->user_agent = request()->userAgent();
+        $user_device->save();
+
         return response()->json(['message' => 'Success save token']);
     }
 
     public function actionSignOut(Request $request)
     {
+        $user = Auth::user();
+
+        $user_devices = UserDevice::where('user_id', $user->user_id)->get();
+        foreach($user_devices as $user_device){
+            $user_device->delete();
+        }
         Auth::logout();
         return redirect('/')->with('message-error', 'Anda berhasil keluar');
     }

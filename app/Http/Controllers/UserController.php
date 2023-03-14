@@ -84,8 +84,13 @@ class UserController extends Controller
         try {
             $user = User::where('uuid', $request->created_by)->first();
             $user->one_signal_id = $request->one_signal_id;
-
             $user->save();
+
+            $user_device = new UserDevice;
+            $user_device->user_id = $user->user_id;
+            $user_device->one_signal_id = $request->one_signal_id;
+            $user_device->user_agent = request()->userAgent();
+            $user_device->save();
 
             return response()->json(['status_code' => 200, 'message' => 'Success to save-update User',
                 'data' => [
